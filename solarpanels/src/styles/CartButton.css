@@ -1,0 +1,51 @@
+
+.notification-btn {
+  width: 105px;
+  height: 42px;
+  padding: 0 19px;
+  background: #4A86E8;
+  border-radius: 6px;
+  outline: 1px #4A86E8 solid;
+  border: none;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  display: flex;
+  cursor: pointer;
+  position: relative;
+}
+
+.notification-btn:hover:not(.disabled) {
+  background: #3672D9;
+}
+
+.notification-btn.disabled,
+.notification-btn:disabled {
+  width: 105px;
+  height: 42px;
+  padding: 0 19px;
+  background: #646c79;
+  border-radius: 6px;
+  outline: 1px #5b687e solid;
+  border: none;
+  cursor: not-allowed;
+}
+
+.notification-badge {
+  height: 32px;
+  padding: 10px;
+  position: absolute;
+  right: -10px;
+  top: -10px;
+  background: #FFD374;
+  border-radius: 1000px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #002F67;
+  font-size: 15px;
+  font-family: 'Noto Sans', Arial, sans-serif;
+  font-weight: 600;
+  min-width: 32px;
+}

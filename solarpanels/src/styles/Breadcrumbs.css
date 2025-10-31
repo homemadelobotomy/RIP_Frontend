@@ -1,0 +1,42 @@
+
+.breadcrumbs-container {
+  margin-bottom: 1.5rem;
+}
+
+.breadcrumbs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.breadcrumb-item a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  text-decoration: underline;
+}
+
+
+.breadcrumb-item.active span {
+  color: #6c757d;
+}
+
+.breadcrumb-item .separator {
+  margin: 0 0.5rem;
+  color: #6c757d;
+}
+
+.breadcrumb-item::before {
+  display: none !important;
+  content: none !important;
+}
