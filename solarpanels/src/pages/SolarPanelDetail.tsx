@@ -7,8 +7,9 @@ import Breadcrumbs from "../components/Breadcrumbs";
 import { getPanelByID } from "../api/Api";
 import type { SolarPanel } from "../api/Api";
 import "../styles/details.css";
+import defaultImg from "../resources/default.png"
 
-const DEFAULT_IMAGE = "/default-panel.jpg";
+const DEFAULT_IMAGE = defaultImg;
 
 function PanelDetails() {
   const { id } = useParams<{ id: string }>();

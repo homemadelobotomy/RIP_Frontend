@@ -28,7 +28,7 @@ const SOLARPANELS = [
         "Width": 992,
         "Depth": 35,
         "Efficiency": "20-22",
-        "Image": "http://127.0.0.1:9000/images/mono.jpeg",
+        "Image": "",
         "IsDelete": false
     },
     {
@@ -41,7 +41,7 @@ const SOLARPANELS = [
         "Width": 998,
         "Depth": 35,
         "Efficiency": "18-20",
-        "Image": "http://127.0.0.1:9000/images/poly.jpeg",
+        "Image": "",
         "IsDelete": false
     },
     {
@@ -54,7 +54,7 @@ const SOLARPANELS = [
         "Width": 600,
         "Depth": 6,
         "Efficiency": "12-15",
-        "Image": "http://127.0.0.1:9000/images/tonko.jpeg",
+        "Image": "",
         "IsDelete": false
     },
     {
@@ -67,7 +67,7 @@ const SOLARPANELS = [
         "Width": 1000,
         "Depth": 40,
         "Efficiency": "21-23",
-        "Image": "http://127.0.0.1:9000/images/premium_mono.png",
+        "Image": "",
         "IsDelete": false
     },
     {
@@ -80,7 +80,7 @@ const SOLARPANELS = [
         "Width": 1100,
         "Depth": 45,
         "Efficiency": "23-25",
-        "Image": "http://127.0.0.1:9000/images/mono.jpeg",
+        "Image": "",
         "IsDelete": false
     }
 ]

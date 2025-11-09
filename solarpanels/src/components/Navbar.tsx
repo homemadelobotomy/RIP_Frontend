@@ -20,9 +20,6 @@ function Navbar() {
         <BSNavbar.Toggle aria-controls="basic-navbar-nav" className="navbar-toggle-custom" />
         <BSNavbar.Collapse id="basic-navbar-nav">
           <Nav className="navbar-nav-custom">
-            <Nav.Link as={Link} to="/" className="nav-link-custom">
-              Главная
-            </Nav.Link>
             <Nav.Link as={Link} to="/panels" className="nav-link-custom">
               Каталог
             </Nav.Link>

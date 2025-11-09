@@ -1,6 +1,5 @@
 
-import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { Form, Button, InputGroup, Alert } from "react-bootstrap";
 import Layout from "../components/Layout";
 import Breadcrumbs from "../components/Breadcrumbs";
@@ -11,13 +10,9 @@ import "../styles/catalog.css";
 import cartIcon from '../resources/vector-50.svg'
 
 function PanelsCatalog() {
-   const [start_value, setBegin] = useState<string>("");
+  const [start_value, setBegin] = useState<string>("");
   const [end_value, setEnd] = useState<string>("");
-
-  const navigate = useNavigate();
   const [panels, setPanels] = useState<SolarPanel[]>([]);
-  
-  
   const [cartInfo, setCartInfo] = useState<SolarPanelsRequestInfo>({
     request_id: 0,
     panels_in_request: -1
@@ -31,31 +26,18 @@ function PanelsCatalog() {
     getSolarPanelsRequestInfo().then((info: SolarPanelsRequestInfo) => {
         setCartInfo(info);
     });
-    
-    return () => {
-      
-    };
   }, []);
 
+
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const data = await getSolarPanels(
-        start_value || null,
-        end_value || null
-      );
-      setPanels(data);
-    } catch (error) {
-      console.error("Ошибка при загрузке панелей:", error);
-      setPanels([]);
-    }
+    e.preventDefault()
+    getSolarPanels(start_value, end_value).then((data:SolarPanel[]) => {
+      setPanels(data)
+    }).catch(() => {
+      setPanels([])
+    })
   };
 
-  const handleCartClick = () => {
-    if (cartInfo.panels_in_request > 0 && cartInfo.request_id > 0) {
-      navigate(`/solar_panels_request/${cartInfo.request_id}`);
-    }
-  };
 
   const isCartDisabled = cartInfo.panels_in_request <= 0 || cartInfo.request_id <= 0;
 
@@ -63,7 +45,7 @@ function PanelsCatalog() {
     <Layout>
       <Breadcrumbs />
       
-          <div className="search-controls-wrapper">
+        <div className="search-controls-wrapper">
         <div className="filter-wrapper">
           <h2 className="search-title">Фильтр по мощности</h2>
           <Form onSubmit={handleSearch} className="search-form">
@@ -96,7 +78,7 @@ function PanelsCatalog() {
 
         <button
           className={`cart-button ${isCartDisabled ? "disabled" : ""}`}
-          onClick={handleCartClick}
+         
           disabled={isCartDisabled}
         >
           <img

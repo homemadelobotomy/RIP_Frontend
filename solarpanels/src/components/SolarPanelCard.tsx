@@ -2,12 +2,12 @@
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import type { SolarPanel } from "../api/Api";
-
+import defaultImg from "../resources/default.png"
 interface SolarPanelCardProps {
   panel: SolarPanel;
 }
 
-const DEFAULT_IMAGE = "http://localhost:9000/images/default.png"; 
+const DEFAULT_IMAGE = defaultImg; 
 
 function SolarPanelCard({ panel }: SolarPanelCardProps) {
   const navigate = useNavigate();
