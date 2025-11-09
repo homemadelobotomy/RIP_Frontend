@@ -1,51 +1,55 @@
-
-import React, { useEffect, useState } from "react";
+// src/pages/PanelsCatalog.tsx
+import { useEffect, } from "react";
 import { Form, Button, InputGroup, Alert } from "react-bootstrap";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { setSolarPanels, setSolarPanelsInRequest } from "../slices/dataSlice";
+import { getSolarPanels, getSolarPanelsRequestInfo } from "../getData";
 import Layout from "../components/Layout";
 import Breadcrumbs from "../components/Breadcrumbs";
 import SolarPanelCard from "../components/SolarPanelCard";
-import { getSolarPanels, getSolarPanelsRequestInfo } from "../api/Api";
-import type { SolarPanel, SolarPanelsRequestInfo } from "../api/Api";
 import "../styles/catalog.css";
-import cartIcon from '../resources/vector-50.svg'
+import cartIcon from "../resources/vector-50.svg";
+import type { SolarPanel } from "../api/Api";
+import { setEndValue, setStartValue } from "../slices/filterSlice";
 
 function PanelsCatalog() {
-  const [start_value, setBegin] = useState<string>("");
-  const [end_value, setEnd] = useState<string>("");
-  const [panels, setPanels] = useState<SolarPanel[]>([]);
-  const [cartInfo, setCartInfo] = useState<SolarPanelsRequestInfo>({
-    request_id: 0,
-    panels_in_request: -1
-  });
+  const dispatch = useAppDispatch();
+  const panels = useAppSelector((state) => state.ourSolarPanels.SolarPanels);
+  const panelsInRequest = useAppSelector((state) => state.ourSolarPanels.solarPanelsInRequest);
+
+  const start_value = useAppSelector((state) => state.filter.start_value);
+  const end_value = useAppSelector((state) => state.filter.end_value);
 
 
   useEffect(() => {
-    getSolarPanels().then((data:SolarPanel[]) => {
-      setPanels(data)
-    })
-    getSolarPanelsRequestInfo().then((info: SolarPanelsRequestInfo) => {
-        setCartInfo(info);
+    getSolarPanels().then((data) => {
+      dispatch(setSolarPanels(data));
+    });
+
+    getSolarPanelsRequestInfo().then((info) => {
+      dispatch(setSolarPanelsInRequest(info.panels_in_request));
     });
   }, []);
 
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
-    getSolarPanels(start_value, end_value).then((data:SolarPanel[]) => {
-      setPanels(data)
-    }).catch(() => {
-      setPanels([])
-    })
+    e.preventDefault();
+    try {
+      const data = await getSolarPanels(start_value || null, end_value || null);
+      dispatch(setSolarPanels(data));
+    } catch (error) {
+      console.error("Ошибка поиска:", error);
+      dispatch(setSolarPanels([]));
+    }
   };
 
-
-  const isCartDisabled = cartInfo.panels_in_request <= 0 || cartInfo.request_id <= 0;
+  const isCartDisabled = panelsInRequest <= 0;
 
   return (
     <Layout>
       <Breadcrumbs />
-      
-        <div className="search-controls-wrapper">
+
+      <div className="search-controls-wrapper">
         <div className="filter-wrapper">
           <h2 className="search-title">Фильтр по мощности</h2>
           <Form onSubmit={handleSearch} className="search-form">
@@ -55,7 +59,7 @@ function PanelsCatalog() {
                   type="number"
                   placeholder="От"
                   value={start_value}
-                  onChange={(e) => setBegin(e.target.value)}
+                  onChange={(e) => dispatch(setStartValue(e.target.value))}
                   min={0}
                   className="start_value"
                 />
@@ -64,7 +68,7 @@ function PanelsCatalog() {
                   type="number"
                   placeholder="До"
                   value={end_value}
-                  onChange={(e) => setEnd(e.target.value)}
+                  onChange={(e) => dispatch(setEndValue(e.target.value))}
                   min={0}
                   className="end_value"
                 />
@@ -76,19 +80,9 @@ function PanelsCatalog() {
           </Form>
         </div>
 
-        <button
-          className={`cart-button ${isCartDisabled ? "disabled" : ""}`}
-         
-          disabled={isCartDisabled}
-        >
-          <img
-            src={cartIcon}
-            alt="Корзина"
-            style={{ width: 20, height: 20 }}
-          />
-          { !isCartDisabled &&(
-            <span className="cart-badge">{cartInfo.panels_in_request}</span>
-          )}
+        <button className={`cart-button ${isCartDisabled ? "disabled" : ""}`} disabled={isCartDisabled}>
+          <img src={cartIcon} alt="Корзина" style={{ width: 20, height: 20 }} />
+          {!isCartDisabled && <span className="cart-badge">{panelsInRequest}</span>}
         </button>
       </div>
 
@@ -99,7 +93,7 @@ function PanelsCatalog() {
       )}
 
       <div className="catalog-grid">
-        {panels.map((panel) => (
+        {panels.map((panel:SolarPanel) => (
           <SolarPanelCard key={panel.ID} panel={panel} />
         ))}
       </div>
