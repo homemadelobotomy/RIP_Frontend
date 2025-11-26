@@ -1,8 +1,10 @@
 // src/api/api.ts
 import axios from "axios";
 import {type SolarPanel, MOCK_PANELS } from "./slices/dataSlice";
+import { dest_api } from "./target_config";
 
-const BASE_URL = "/api";
+
+
 
 
 export interface SolarPanelsRequestInfo {
@@ -10,7 +12,6 @@ export interface SolarPanelsRequestInfo {
   panels_in_request: number;
 }
 
-// Получение панелей с фильтрацией
 export async function getSolarPanels(
   start_value?: string | null,
   end_value?: string | null
@@ -20,7 +21,7 @@ export async function getSolarPanels(
     if (start_value) params.set("start_value", start_value);
     if (end_value) params.set("end_value", end_value);
 
-    const response = await axios.get(`${BASE_URL}/panels?${params.toString()}`);
+    const response = await axios.get(`${dest_api}/panels?${params.toString()}`);
     return response.data;
   } catch (error) {
     
@@ -37,7 +38,7 @@ export async function getSolarPanels(
 
 export async function getSolarPanelsRequestInfo(): Promise<SolarPanelsRequestInfo> {
   try {
-    const response = await axios.get(`${BASE_URL}/solarpanel-requests/info`);
+    const response = await axios.get(`${dest_api}/solarpanel-requests/info`);
     return response.data;
   } catch (error) {
 
@@ -50,7 +51,7 @@ export async function getSolarPanelsRequestInfo(): Promise<SolarPanelsRequestInf
 
 export async function getPanelByID(id: string | number): Promise<SolarPanel> {
   try {
-    const response = await axios.get(`${BASE_URL}/panels/${id}`);
+    const response = await axios.get(`${dest_api}/panels/${id}`);
     return response.data;
   } catch (error) {
     const panel = MOCK_PANELS.find((p) => p.ID === parseInt(String(id)));

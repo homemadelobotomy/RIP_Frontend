@@ -7,7 +7,7 @@ function HomePage() {
     
       <div className="homepage-hero">
         <div className="hero-content">
-          <h1 className="display-4 mb-4">
+          <h1 >
              Рассчет фермы солнечных панелей
           </h1>
           

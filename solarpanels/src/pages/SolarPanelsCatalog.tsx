@@ -1,6 +1,5 @@
-// src/pages/PanelsCatalog.tsx
-import { useEffect, } from "react";
-import { Form, Button, InputGroup, Alert } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Form, Button, InputGroup, Alert, Modal } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { setSolarPanels, setSolarPanelsInRequest } from "../slices/dataSlice";
 import { getSolarPanels, getSolarPanelsRequestInfo } from "../getData";
@@ -9,34 +8,35 @@ import Breadcrumbs from "../components/Breadcrumbs";
 import SolarPanelCard from "../components/SolarPanelCard";
 import "../styles/catalog.css";
 import cartIcon from "../resources/vector-50.svg";
-import type { SolarPanel } from "../api/Api";
+import filterIcon from "../../public/Filter.png"
 import { setEndValue, setStartValue } from "../slices/filterSlice";
 
 function PanelsCatalog() {
   const dispatch = useAppDispatch();
-  const panels = useAppSelector((state) => state.ourSolarPanels.SolarPanels);
+  const panels = useAppSelector((state) => state.ourSolarPanels?.SolarPanels ?? []);
   const panelsInRequest = useAppSelector((state) => state.ourSolarPanels.solarPanelsInRequest);
-
   const start_value = useAppSelector((state) => state.filter.start_value);
   const end_value = useAppSelector((state) => state.filter.end_value);
 
+  const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
-    getSolarPanels().then((data) => {
-      dispatch(setSolarPanels(data));
-    });
-
-    getSolarPanelsRequestInfo().then((info) => {
-      dispatch(setSolarPanelsInRequest(info.panels_in_request));
-    });
+    getSolarPanels(start_value,end_value)
+      .then((data) => {
+        dispatch(setSolarPanels(data));
+      })
+      .catch(() => {
+        dispatch(setSolarPanels([]));
+      });
+    getSolarPanelsRequestInfo().then((info) => dispatch(setSolarPanelsInRequest(info.panels_in_request)));
   }, []);
-
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const data = await getSolarPanels(start_value || null, end_value || null);
       dispatch(setSolarPanels(data));
+      setShowFilter(false); 
     } catch (error) {
       console.error("Ошибка поиска:", error);
       dispatch(setSolarPanels([]));
@@ -46,59 +46,88 @@ function PanelsCatalog() {
   const isCartDisabled = panelsInRequest <= 0;
 
   return (
-    <Layout>
-      <Breadcrumbs />
+  <Layout>
+    <Breadcrumbs />
 
-      <div className="search-controls-wrapper">
-        <div className="filter-wrapper">
-          <h2 className="search-title">Фильтр по мощности</h2>
-          <Form onSubmit={handleSearch} className="search-form">
-            <div className="filter-inputs">
-              <InputGroup>
-                <Form.Control
-                  type="number"
-                  placeholder="От"
-                  value={start_value}
-                  onChange={(e) => dispatch(setStartValue(e.target.value))}
-                  min={0}
-                  className="start_value"
-                />
-                <InputGroup.Text className="range-separator">-</InputGroup.Text>
-                <Form.Control
-                  type="number"
-                  placeholder="До"
-                  value={end_value}
-                  onChange={(e) => dispatch(setEndValue(e.target.value))}
-                  min={0}
-                  className="end_value"
-                />
-              </InputGroup>
-              <Button type="submit" variant="primary" className="search-btn">
-                Найти
-              </Button>
-            </div>
-          </Form>
-        </div>
+    <div className="filter-section">
+      <Button 
+        variant="outline-primary" 
+        onClick={() => setShowFilter(true)} 
+        className="filter-toggle-btn"
+      >
+        <img src={filterIcon} style={{width:30 ,height:30 }}></img>
+      </Button>
 
-        <button className={`cart-button ${isCartDisabled ? "disabled" : ""}`} disabled={isCartDisabled}>
-          <img src={cartIcon} alt="Корзина" style={{ width: 20, height: 20 }} />
-          {!isCartDisabled && <span className="cart-badge">{panelsInRequest}</span>}
-        </button>
+      
+      <div className="filter-desktop">
+        <Form onSubmit={handleSearch} className="filter-form">
+          <InputGroup>
+            <Form.Control
+              type="number"
+              placeholder="От"
+              value={start_value}
+              onChange={(e) => dispatch(setStartValue(e.target.value))}
+              min={0}
+            />
+            <InputGroup.Text>-</InputGroup.Text>
+            <Form.Control
+              type="number"
+              placeholder="До"
+              value={end_value}
+              onChange={(e) => dispatch(setEndValue(e.target.value))}
+              min={0}
+            />
+          </InputGroup>
+          <Button type="submit" variant="primary">Найти</Button>
+        </Form>
       </div>
 
-      {panels.length === 0 && (
-        <Alert variant="warning" className="mt-4">
-          Нет панелей, соответствующих заданным фильтрам
-        </Alert>
-      )}
 
-      <div className="catalog-grid">
-        {panels.map((panel:SolarPanel) => (
-          <SolarPanelCard key={panel.ID} panel={panel} />
-        ))}
-      </div>
-    </Layout>
-  );
+      <button className={`cart-button ${isCartDisabled ? "disabled" : ""}`} disabled={isCartDisabled}>
+        <img src={cartIcon} alt="Корзина" style={{ width: 20, height: 20 }} />
+        {!isCartDisabled && <span className="cart-badge">{panelsInRequest}</span>}
+      </button>
+    </div>
+
+
+    <Modal show={showFilter} onHide={() => setShowFilter(false)} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Фильтр по мощности</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSearch}>
+          <InputGroup className="mb-3">
+            <Form.Control
+              type="number"
+              placeholder="От"
+              value={start_value}
+              onChange={(e) => dispatch(setStartValue(e.target.value))}
+              min={0}
+            />
+            <InputGroup.Text>-</InputGroup.Text>
+            <Form.Control
+              type="number"
+              placeholder="До"
+              value={end_value}
+              onChange={(e) => dispatch(setEndValue(e.target.value))}
+              min={0}
+            />
+          </InputGroup>
+          <Button type="submit" variant="primary" className="w-100">Найти</Button>
+        </Form>
+      </Modal.Body>
+    </Modal>
+
+    {panels.length === 0 && <Alert variant="warning" className="mt-4">Нет панелей</Alert>}
+
+    <div className="catalog-grid">
+      {panels.map((panel) => (
+        <SolarPanelCard key={panel.ID} panel={panel} />
+      ))}
+    </div>
+  </Layout>
+);
+
 }
 
 export default PanelsCatalog;

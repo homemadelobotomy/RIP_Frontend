@@ -20,7 +20,6 @@ export interface DataState {
   solarPanelsInRequest: number;
 }
 
-// Моковые данные (fallback)
 export const MOCK_PANELS: SolarPanel[] = [
   {
     ID: 1,
@@ -51,7 +50,7 @@ export const MOCK_PANELS: SolarPanel[] = [
 ];
 
 const initialState: DataState = {
-  SolarPanels: MOCK_PANELS, 
+  SolarPanels: [], 
   solarPanelsInRequest: 0,
 };
 

@@ -1,0 +1,16 @@
+{
+  "name": "SolarPanels",
+  "short_name": "SolarPanels",
+  "start_url": "/RIP_Frontend/",
+  "display": "standalone",
+  "background_color": "#fdfdfd",
+  "theme_color": "#db4938",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/default.png",
+      "type": "image/png", "sizes": "192x192"
+    }
+    
+  ]
+}

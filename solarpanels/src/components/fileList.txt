@@ -1,0 +1,8 @@
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/App.css
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/App.tsx
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/styles/VideoLayout.css
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/styles/Layout.css
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/styles/Header.css
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/components/Header.tsx
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/components/Layout.tsx
+/home/homemadelobotomy/Documents/RIP_Frontend/solarpanels/src/components/VideoLayout.tsx

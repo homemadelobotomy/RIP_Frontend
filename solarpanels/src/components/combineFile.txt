@@ -1,0 +1,234 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import HomePage from "./pages/MainPage";
+import PanelsCatalog from "./pages/SolarPanelsCatalog";
+import PanelDetails from "./pages/SolarPanelDetail";
+import { useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import {  dest_root } from "./target_config";
+
+function App() {
+  useEffect(()=>{
+    invoke('tauri', {cmd:'create'})
+      .then(() =>{console.log("Tauri launched")})
+      .catch(() =>{console.log("Tauri not launched")})
+    return () =>{
+      invoke('tauri', {cmd:'close'})
+        .then(() =>{console.log("Tauri launched")})
+        .catch(() =>{console.log("Tauri not launched")})
+    }
+  }, [])
+  return (
+    <Router basename = {dest_root} 
+    //"RIP_Frontend/"
+    >
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/panels" element={<PanelsCatalog />} />
+        <Route path="/panels/:id" element={<PanelDetails />} />
+        
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+
+.layout-wrapper {
+  min-height: 100vh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+}
+
+.background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.content-overlay {
+  position: relative;
+  z-index: 2; 
+  min-height: 100vh;
+  width: 100vw;
+
+}
+
+.layout-content {
+  flex: 1;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-content {
+  flex: 1;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.header-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: #EFEFEF !important;
+  border-bottom: 1px solid #E0E0E0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 70px;
+  z-index: 1000; 
+}
+
+.header-brand {
+  color: #666 !important;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-family: 'Noto Sans', Arial, sans-serif;
+  font-weight: 600 !important;
+  margin: 0 auto;
+}
+
+.header-brand:hover {
+  color: #333 !important;
+}
+
+
+
+import { Navbar, Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import "../styles/Header.css";
+
+function Header() {
+  return (
+    <Navbar className="header-navbar">
+      <Container fluid>
+        <Navbar.Brand as={Link} to="/panels" className="header-brand">
+          СОЛНЕЧНЫЕ ПАНЕЛИ
+        </Navbar.Brand>
+      </Container>
+    </Navbar>
+  );
+}
+
+export default Header;
+
+
+
+import type { ReactNode } from "react";
+import Navbar from "./Navbar";
+import { Container } from "react-bootstrap";
+import "../styles/Layout.css";
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+function Layout({ children }: LayoutProps) {
+  return (
+    <div className="layout-wrapper">
+      <Navbar />
+      <Container className="layout-content">
+        {children}
+      </Container>
+    </div>
+  );
+}
+
+export default Layout;
+
+
+import Navbar from "./Navbar";
+import "../styles/VideoLayout.css";
+import type { ReactNode } from "react";
+import video from "../resources/mixkit-view-of-a-solar-panel-farm-generating-sustainable-energy-47097-hd-ready.mp4"
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+function Layout({ children }: LayoutProps) {
+  return (
+    <div className="layout-wrapper">
+
+      <video
+        className="background-video"
+        autoPlay
+        loop
+        muted
+        playsInline
+        poster=""
+      >
+        <source src={video} type="video/mp4" />
+        Ваш браузер не поддерживает видео.
+      </video>
+      <div className="content-overlay">
+        <Navbar />
+        <div className="layout-content">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Layout;
+

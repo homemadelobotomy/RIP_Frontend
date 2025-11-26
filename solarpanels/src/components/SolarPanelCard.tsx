@@ -1,7 +1,7 @@
 
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import type { SolarPanel } from "../api/Api";
+import type { SolarPanel } from "../slices/dataSlice";
 import defaultImg from "../resources/default.png"
 interface SolarPanelCardProps {
   panel: SolarPanel;

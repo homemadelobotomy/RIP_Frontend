@@ -1,23 +1,25 @@
 .homepage-hero {
-  position: relative;
   min-height: 80vh;
-  width: 100%;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  
+  text-align: center;
 }
 
 .hero-content {
-  position: relative;
-  z-index: 2;
   color: #fff;
   max-width: 700px;
-  text-align: center;
-  margin: 0 auto;
-  padding-top: 10vh;
-  padding-bottom: 10vh;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  padding: 2rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
 
+.hero-content h1 {
+  font-size: clamp(2rem, 3vw, 3.5rem);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  opacity: 0.95;
+}

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App'
 import store from "./store";
 import { Provider } from "react-redux";
+import {registerSW} from "virtual:pwa-register"
 
 
 const root = ReactDOM.createRoot(
@@ -16,3 +17,7 @@ root.render(
         </Provider>
     </React.StrictMode>
 );
+
+if ("serviceWorker" in navigator) {
+  registerSW()
+}

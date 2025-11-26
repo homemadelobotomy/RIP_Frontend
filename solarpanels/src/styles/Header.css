@@ -1,0 +1,46 @@
+.header-navbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: #EFEFEF !important;
+  border-bottom: 1px solid #E0E0E0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 70px;
+  z-index: 1000;
+}
+
+.header-brand {
+  color: #666 !important;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-family: 'Noto Sans', Arial, sans-serif;
+  font-weight: 600 !important;
+  text-decoration: none;
+}
+
+.header-brand:hover {
+  color: #333 !important;
+}
+
+.header-link {
+  color: #666 !important;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  text-decoration: none;
+}
+
+.header-link:hover {
+  color: #4A86E8 !important;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 992px) {
+  .navbar-collapse {
+    background-color: #EFEFEF;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border-radius: 8px;
+  }
+}
