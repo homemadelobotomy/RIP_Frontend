@@ -1,4 +1,4 @@
-// src/store/slices/dataSlice.ts
+
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface SolarPanel {

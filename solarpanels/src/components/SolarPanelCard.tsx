@@ -1,17 +1,28 @@
-
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { addPanelToRequest, fetchRequestInfo } from "../slices/solarpanelRequestSlice";
 import type { SolarPanel } from "../slices/dataSlice";
-import defaultImg from "../resources/default.png"
+import defaultImg from "../resources/default.png";
+
 interface SolarPanelCardProps {
   panel: SolarPanel;
 }
 
-const DEFAULT_IMAGE = defaultImg; 
+const DEFAULT_IMAGE = defaultImg;
 
 function SolarPanelCard({ panel }: SolarPanelCardProps) {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { isAuth } = useAppSelector((state) => state.auth);
   const imageUrl = panel.Image || DEFAULT_IMAGE;
+
+  const handleAdd = async () => {
+    if (panel.ID) {
+      await dispatch(addPanelToRequest(panel.ID));
+      await dispatch(fetchRequestInfo());
+    }
+  };
 
   return (
     <Card className="product-card h-100">
@@ -36,6 +47,15 @@ function SolarPanelCard({ panel }: SolarPanelCardProps) {
         >
           Подробнее
         </Button>
+        {isAuth && (
+          <Button
+            variant="primary"
+            className="mt-2 card-button"
+            onClick={handleAdd}
+          >
+            Добавить
+          </Button>
+        )}
       </Card.Body>
     </Card>
   );

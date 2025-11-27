@@ -1,56 +1,42 @@
 import { useEffect } from "react";
-import { Badge, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { setSolarPanelsInRequest } from "../slices/dataSlice";
-import { getSolarPanelsRequestInfo } from "../getData";
+import { fetchRequestInfo } from "../slices/solarpanelRequestSlice";
 import cartIcon from "../resources/vector-50.svg";
 
 function CartButton() {
-const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  
+  const { requestInfo } = useAppSelector((state) => state.solarpanelRequest);
+  const { isAuth } = useAppSelector((state) => state.auth);
+  
+  const panelsInRequest = requestInfo.panels_in_request ?? 0;
+  const requestId = requestInfo.request_id;
 
-const panelsInRequest = useAppSelector(
-(state) => state.ourSolarPanels?.solarPanelsInRequest ?? 0
-);
+  useEffect(() => {
+      dispatch(fetchRequestInfo());
+  }, [dispatch]);
 
-useEffect(() => {
+  const isDisabled = panelsInRequest <= 0 || !isAuth;
 
-getSolarPanelsRequestInfo()
-  .then((info) => {
-      console.log("Загружена информация о корзине:", info);
-      dispatch(setSolarPanelsInRequest(info.panels_in_request));
-  })
-  .catch(() => {
-      dispatch(setSolarPanelsInRequest(0));
-  });
+  const handleClick = () => {
+    if (requestId) {
+      navigate(`/requests/${requestId}`);
+    }
+  };
 
-
-}, []);
-
-const isDisabled = panelsInRequest <= 0;
-
-return (
-  <Button
-    as={Link as any}
-    to="/cart"
-    variant={isDisabled ? "secondary" : "warning"}
-    disabled={isDisabled}
-    className="cart-button-component"
+  return (
+    <button
+      className={`cart-button ${isDisabled ? "disabled" : ""}`}
+      disabled={isDisabled}
+      onClick={handleClick}
     >
-      <img
-      src={cartIcon}
-      alt="Корзина"
-      style={{ width: 20, height: 20, marginRight: 8 }}
-      />
-        {panelsInRequest > 0 && (
-        <Badge bg="danger" className="ms-1">
-        {panelsInRequest}
-        </Badge>
-        )}
-        <span className="visually-hidden">
-            {panelsInRequest}
-        </span>
-  </Button>
+      <img src={cartIcon} alt="Корзина" style={{ width: 20, height: 20 }} />
+      {panelsInRequest > 0 && (
+        <span className="cart-badge">{panelsInRequest}</span>
+      )}
+    </button>
   );
 }
 

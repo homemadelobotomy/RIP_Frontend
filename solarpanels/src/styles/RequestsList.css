@@ -1,0 +1,103 @@
+.requests-page {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.requests-page h2 {
+  color: #666;
+  font-family: 'Noto Sans', Arial, sans-serif;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.requests-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.requests-table thead {
+  background: #EFEFEF;
+}
+
+.requests-table th {
+  color: #666;
+  font-family: 'Noto Sans', Arial, sans-serif;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid #E0E0E0;
+}
+
+.requests-table td {
+  padding: 1rem;
+  font-family: 'Noto Sans', Arial, sans-serif;
+  color: #1F1F1F;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.requests-table tbody tr {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.requests-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Noto Sans', Arial, sans-serif;
+}
+
+.status-draft {
+  background: #6c757d;
+  color: white;
+}
+
+.status-formed {
+  background: #4A86E8;
+  color: white;
+}
+
+.status-completed {
+  background: #28a745;
+  color: white;
+}
+
+.status-rejected {
+  background: #d9534f;
+  color: white;
+}
+
+.no-requests {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-family: 'Noto Sans', Arial, sans-serif;
+}
+
+@media (max-width: 768px) {
+  .requests-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .requests-table th,
+  .requests-table td {
+    padding: 0.5rem;
+    font-size: 14px;
+  }
+}

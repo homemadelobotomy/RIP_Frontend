@@ -7,14 +7,13 @@ import Layout from "../components/Layout";
 import Breadcrumbs from "../components/Breadcrumbs";
 import SolarPanelCard from "../components/SolarPanelCard";
 import "../styles/catalog.css";
-import cartIcon from "../resources/vector-50.svg";
 import filterIcon from "../../public/Filter.png"
 import { setEndValue, setStartValue } from "../slices/filterSlice";
+import CartButton from "../components/CartButton";
 
 function PanelsCatalog() {
   const dispatch = useAppDispatch();
   const panels = useAppSelector((state) => state.ourSolarPanels?.SolarPanels ?? []);
-  const panelsInRequest = useAppSelector((state) => state.ourSolarPanels.solarPanelsInRequest);
   const start_value = useAppSelector((state) => state.filter.start_value);
   const end_value = useAppSelector((state) => state.filter.end_value);
 
@@ -43,7 +42,6 @@ function PanelsCatalog() {
     }
   };
 
-  const isCartDisabled = panelsInRequest <= 0;
 
   return (
   <Layout>
@@ -83,10 +81,7 @@ function PanelsCatalog() {
       </div>
 
 
-      <button className={`cart-button ${isCartDisabled ? "disabled" : ""}`} disabled={isCartDisabled}>
-        <img src={cartIcon} alt="Корзина" style={{ width: 20, height: 20 }} />
-        {!isCartDisabled && <span className="cart-badge">{panelsInRequest}</span>}
-      </button>
+      <CartButton/>
     </div>
 
 
