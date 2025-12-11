@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import {VitePWA} from 'vite-plugin-pwa'
-import {api_proxy_addr} from "./src/target_config"
+// import {api_proxy_addr} from "./src/target_config"
 import mkcert from 'vite-plugin-mkcert'
 import fs from 'fs'
 import path from 'path'
@@ -9,12 +9,14 @@ import path from 'path'
 export default defineConfig({
   server: {port:3000,
     host:true,
-    proxy:{
-      "/api" :{
-        target: api_proxy_addr,
-        changeOrigin:true,   
-      }
-    },
+    // proxy:{
+    //   "/api" :{
+    //     target: api_proxy_addr,
+    //     changeOrigin:true,   
+    //     ws: true,
+    //     secure: false,
+    //   }
+    // },
     https:{
       key:fs.readFileSync(path.resolve(__dirname,'cert.key')),
       cert: fs.readFileSync(path.resolve(__dirname,'cert.crt'))
@@ -44,6 +46,6 @@ export default defineConfig({
     }),
     mkcert()
   ],
-   base: "/" 
-  // "/RIP_Frontend/"
+  //  base: "/" 
+  base: "/RIP_Frontend/"
 })

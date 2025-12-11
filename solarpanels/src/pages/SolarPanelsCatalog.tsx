@@ -23,6 +23,7 @@ function PanelsCatalog() {
   useEffect(() => {
     getSolarPanels(start_value,end_value)
       .then((data) => {
+        console.log(data)
         dispatch(setSolarPanels(data));
       })
       .catch(() => {
