@@ -3,15 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Spinner, Alert } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import {
-  fetchCurrentRequest,
-  updatePanelArea,
-  removePanelFromRequest,
-  updateInsolation,
-  deleteRequest,
-  formateRequest,
-  moderateRequest,
-  fetchRequestInfo,
-  clearError,
+  fetchCurrentSolarPanelRequest,
+  updateSolarPanelArea,
+  removeSolarPanelFromRequest,
+  updateSolarPanelInsolation,
+  deleteSolarPanelRequest,
+  formateSolarPanelRequest,
+  moderateSolarPanelRequest,
+  fetchSolarPanelRequestInfo,
+  clearSolarPanelRequestError,
 } from "../slices/solarpanelRequestSlice";
 import Layout from "../components/Layout";
 import defaultImg from "../resources/default.png";
@@ -36,7 +36,7 @@ function RequestDetailPage() {
         navigate("/")
     }
     if (id) {
-      dispatch(fetchCurrentRequest(Number(id)));
+      dispatch(fetchCurrentSolarPanelRequest(Number(id)));
     }
   }, [dispatch, id]);
 
@@ -56,7 +56,7 @@ function RequestDetailPage() {
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
-        dispatch(clearError());
+        dispatch(clearSolarPanelRequestError());
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -71,60 +71,60 @@ function RequestDetailPage() {
         return;
       }
 
-      const areaResult = await dispatch(updatePanelArea({ 
+      const areaResult = await dispatch(updateSolarPanelArea({ 
         requestId: Number(id), 
         panelId, 
         area 
       }));
       
-      if (updatePanelArea.rejected.match(areaResult)) {
+      if (updateSolarPanelArea.rejected.match(areaResult)) {
         return;
       }
   
 
-    dispatch(fetchCurrentRequest(Number(id)));
+    dispatch(fetchCurrentSolarPanelRequest(Number(id)));
   };
   const handleSaveInsolationChanges = async () => {
     if (!id) return;
-    const insolationResult = await dispatch(updateInsolation({ requestId: Number(id), insolation }));
+    const insolationResult = await dispatch(updateSolarPanelInsolation({ requestId: Number(id), insolation }));
     
-    if (updateInsolation.rejected.match(insolationResult)) {
+    if (updateSolarPanelInsolation.rejected.match(insolationResult)) {
       return;
     }
-    dispatch(fetchCurrentRequest(Number(id)));
+    dispatch(fetchCurrentSolarPanelRequest(Number(id)));
     
   };
 
   const handleRemovePanel = async (panelId: number) => {
     if (id) {
-      await dispatch(removePanelFromRequest({ requestId: Number(id), panelId }));
-      await dispatch(fetchCurrentRequest(Number(id)));
+      await dispatch(removeSolarPanelFromRequest({ requestId: Number(id), panelId }));
+      await dispatch(fetchCurrentSolarPanelRequest(Number(id)));
       console.log(currentRequest)
     }
   };
 
   const handleDeleteRequest = async () => {
     if (id) {
-      await dispatch(deleteRequest(Number(id)));
-      await dispatch(fetchRequestInfo());
+      await dispatch(deleteSolarPanelRequest(Number(id)));
+      await dispatch(fetchSolarPanelRequestInfo());
       navigate("/panels");
     }
   };
 
   const handleFormateRequest = async () => {
     if (!id) return;
-    const result = await dispatch(formateRequest(Number(id)));
+    const result = await dispatch(formateSolarPanelRequest(Number(id)));
     
-    if (formateRequest.fulfilled.match(result)) {
+    if (formateSolarPanelRequest.fulfilled.match(result)) {
       navigate("/solarpanel-requests");
     }
   };
 
   const handleModerate = async (action: string) => {
     if (id) {
-      const result = await dispatch(moderateRequest({ requestId: Number(id), action }));
+      const result = await dispatch(moderateSolarPanelRequest({ requestId: Number(id), action }));
       
-      if (moderateRequest.fulfilled.match(result)) {
+      if (moderateSolarPanelRequest.fulfilled.match(result)) {
         navigate("/solarpanel-requests");
       }
     }

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { fetchRequestInfo } from "../slices/solarpanelRequestSlice";
+import { fetchSolarPanelRequestInfo } from "../slices/solarpanelRequestSlice";
 import cartIcon from "../resources/vector-50.svg";
 
 function CartButton() {
@@ -15,7 +15,7 @@ function CartButton() {
   const requestId = requestInfo.request_id;
 
   useEffect(() => {
-      dispatch(fetchRequestInfo());
+      dispatch(fetchSolarPanelRequestInfo());
   }, [dispatch]);
 
   const isDisabled = panelsInRequest <= 0 || !isAuth;

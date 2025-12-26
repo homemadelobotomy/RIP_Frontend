@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { Form, Button, InputGroup, Alert, Modal } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { fetchSolarPanels } from "../slices/dataSlice";
-import { fetchRequestInfo } from "../slices/solarpanelRequestSlice";
+import { fetchSolarPanelRequestInfo } from "../slices/solarpanelRequestSlice";
 import Layout from "../components/Layout";
 import Breadcrumbs from "../components/Breadcrumbs";
 import SolarPanelCard from "../components/SolarPanelCard";
 import "../styles/catalog.css";
 import filterIcon from "../../public/Filter.png"
-import { setEndValue, setStartValue } from "../slices/filterSlice";
+import { setSolarPanelEndValue, setSolarPanelStartValue } from "../slices/filterSlice";
 import CartButton from "../components/CartButton";
 
 function PanelsCatalog() {
@@ -24,7 +24,7 @@ function PanelsCatalog() {
     dispatch(fetchSolarPanels({ start_value, end_value }));
     
     if (isAuth) {
-      dispatch(fetchRequestInfo());
+      dispatch(fetchSolarPanelRequestInfo());
     }
   }, [dispatch, isAuth]);
 
@@ -56,7 +56,7 @@ function PanelsCatalog() {
               type="number"
               placeholder="От"
               value={start_value ?? ""}
-              onChange={(e) => dispatch(setStartValue(e.target.value ? Number(e.target.value) : null))}
+              onChange={(e) => dispatch(setSolarPanelStartValue(e.target.value ? Number(e.target.value) : null))}
               min={0}
             />
             <InputGroup.Text>-</InputGroup.Text>
@@ -64,7 +64,7 @@ function PanelsCatalog() {
               type="number"
               placeholder="До"
               value={end_value ?? ""}
-              onChange={(e) => dispatch(setEndValue(e.target.value ? Number(e.target.value) : null))}
+              onChange={(e) => dispatch(setSolarPanelEndValue(e.target.value ? Number(e.target.value) : null))}
               min={0}
             />
           </InputGroup>
@@ -88,7 +88,7 @@ function PanelsCatalog() {
               type="number"
               placeholder="От"
               value={start_value ?? ""}
-              onChange={(e) => dispatch(setStartValue(e.target.value ? Number(e.target.value) : null))}
+              onChange={(e) => dispatch(setSolarPanelStartValue(e.target.value ? Number(e.target.value) : null))}
               min={0}
             />
             <InputGroup.Text>-</InputGroup.Text>
@@ -96,7 +96,7 @@ function PanelsCatalog() {
               type="number"
               placeholder="До"
               value={end_value ?? ""}
-              onChange={(e) => dispatch(setEndValue(e.target.value ? Number(e.target.value) : null))}
+              onChange={(e) => dispatch(setSolarPanelEndValue(e.target.value ? Number(e.target.value) : null))}
 
               min={0}
             />

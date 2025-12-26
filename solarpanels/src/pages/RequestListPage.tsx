@@ -2,12 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Row, Col, Button } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { fetchRequestsList, moderateRequest } from "../slices/solarpanelRequestSlice";
+import { fetchSolarPanelRequestsList, moderateSolarPanelRequest } from "../slices/solarpanelRequestSlice";
 import Layout from "../components/Layout";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { RequestCard } from "../components/RequestCard";
 import { formatDateForAPI } from "../utils/dataUtils";
-import { resetRequestFilter, setEndDate, setStartDate, setStatus, setCreator } from "../slices/requestFilter";
+import { resetSolarPanelRequestFilter, setSolarPanelRequestEndDate, setSolarPanelRequestStartDate, setSolarPanelRequestStatus, setSolarPanelRequestCreator } from "../slices/requestFilter";
 import "../styles/RequestsList.css";
 
 const POLLING_INTERVAL = 5000;
@@ -39,7 +39,7 @@ function RequestsListPage() {
     if (filters.status) apiFilters.status = filters.status;
     if (filters.start_date) apiFilters.start_date = formatDateForAPI(filters.start_date + " 00:00:00");
     if (filters.end_date) apiFilters.end_date = formatDateForAPI(filters.end_date + " 23:59:59");
-    return dispatch(fetchRequestsList(apiFilters));
+    return dispatch(fetchSolarPanelRequestsList(apiFilters));
   }, [dispatch]);
 
   
@@ -52,10 +52,10 @@ function RequestsListPage() {
     const today = getTodayDate();
     
     if (!start_date) {
-      dispatch(setStartDate(today));
+      dispatch(setSolarPanelRequestStartDate(today));
     }
     if (!end_date) {
-      dispatch(setEndDate(today));
+      dispatch(setSolarPanelRequestEndDate(today));
     }
     
     const initialFilters = {
@@ -79,7 +79,7 @@ function RequestsListPage() {
   }, [isAuth, appliedFilters, pollingTrigger]);
 
     function handleResetFilter () {
-    dispatch(resetRequestFilter());
+    dispatch(resetSolarPanelRequestFilter());
     setAppliedFilters({ status: '', start_date: '', end_date: '', creator: '' });
     setLoading(true);
     loadRequests({ status: '', start_date: '', end_date: '' }).finally(() => setLoading(false));
@@ -94,8 +94,8 @@ function RequestsListPage() {
 
   const handleStatusChange = async (requestId: number, action: string) => {
     setUpdatingRequestId(requestId);
-    const result = await dispatch(moderateRequest({ requestId, action }));
-    if (moderateRequest.fulfilled.match(result)) {
+    const result = await dispatch(moderateSolarPanelRequest({ requestId, action }));
+    if (moderateSolarPanelRequest.fulfilled.match(result)) {
       await loadRequests(appliedFilters);
     }
     setUpdatingRequestId(null);
@@ -118,7 +118,7 @@ function RequestsListPage() {
             <Row className="g-3">
               <Col md={isModerator ? 2 : 3}>
                 <Form.Label>Статус</Form.Label>
-                <Form.Select value={status} onChange={(e) => dispatch(setStatus(e.target.value))}>
+                <Form.Select value={status} onChange={(e) => dispatch(setSolarPanelRequestStatus(e.target.value))}>
                   <option value="">Все</option>
                   <option value="сформирован">Сформирован</option>
                   <option value="завершен">Завершен</option>
@@ -128,7 +128,7 @@ function RequestsListPage() {
               {isModerator && (
                 <Col md={2}>
                   <Form.Label>Создатель</Form.Label>
-                  <Form.Control type="text" placeholder="Логин" value={creator} onChange={(e) => dispatch(setCreator(e.target.value))} list="creators-list" />
+                  <Form.Control type="text" placeholder="Логин" value={creator} onChange={(e) => dispatch(setSolarPanelRequestCreator(e.target.value))} list="creators-list" />
                   <datalist id="creators-list">
                     {uniqueCreators.map(c => <option key={c} value={c} />)}
                   </datalist>
@@ -136,11 +136,11 @@ function RequestsListPage() {
               )}
               <Col md={isModerator ? 2 : 3}>
                 <Form.Label>Дата от</Form.Label>
-                <Form.Control type="date" value={start_date} onChange={(e) => dispatch(setStartDate(e.target.value))} />
+                <Form.Control type="date" value={start_date} onChange={(e) => dispatch(setSolarPanelRequestStartDate(e.target.value))} />
               </Col>
               <Col md={isModerator ? 2 : 3}>
                 <Form.Label>Дата до</Form.Label>
-                <Form.Control type="date" value={end_date} onChange={(e) => dispatch(setEndDate(e.target.value))} />
+                <Form.Control type="date" value={end_date} onChange={(e) => dispatch(setSolarPanelRequestEndDate(e.target.value))} />
               </Col>
               <Col md={2}>
                 <Form.Label>&nbsp;</Form.Label>

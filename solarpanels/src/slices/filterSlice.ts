@@ -1,31 +1,32 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-interface FilterState {
+interface SolarPanelFilterState {
   start_value: number | null;
   end_value: number | null;
 }
 
-const initialState: FilterState = {
+const initialState: SolarPanelFilterState = {
   start_value: null,
   end_value: null,
 };
 
-const filterSlice = createSlice({
-  name: "filter",
+const solarPanelFilterSlice = createSlice({
+  name: "solarPanelFilter",
   initialState,
   reducers: {
-    setStartValue(state, action: PayloadAction<number|null>) {
+    setSolarPanelStartValue(state, action: PayloadAction<number | null>) {
       state.start_value = action.payload;
     },
-    setEndValue(state, action: PayloadAction<number|null>) {
+    setSolarPanelEndValue(state, action: PayloadAction<number | null>) {
       state.end_value = action.payload;
     },
-    resetFilter(state) {
+    resetSolarPanelFilter(state) {
       state.start_value = null;
       state.end_value = null;
     }
   }
 });
 
-export const { setStartValue, setEndValue, resetFilter } = filterSlice.actions;
-export default filterSlice.reducer;
+export const { setSolarPanelStartValue, setSolarPanelEndValue, 
+  resetSolarPanelFilter } = solarPanelFilterSlice.actions;
+export default solarPanelFilterSlice.reducer;

@@ -1,7 +1,7 @@
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { addPanelToRequest, fetchRequestInfo } from "../slices/solarpanelRequestSlice";
+import { addSolarPanelToRequest, fetchSolarPanelRequestInfo } from "../slices/solarpanelRequestSlice";
 import type { SolarPanel } from "../slices/dataSlice";
 import defaultImg from "../resources/default.png";
 
@@ -19,8 +19,8 @@ function SolarPanelCard({ panel }: SolarPanelCardProps) {
 
   const handleAdd = async () => {
     if (panel.ID) {
-      await dispatch(addPanelToRequest(panel.ID));
-      await dispatch(fetchRequestInfo());
+      await dispatch(addSolarPanelToRequest(panel.ID));
+      await dispatch(fetchSolarPanelRequestInfo());
     }
   };
 
