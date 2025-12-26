@@ -179,9 +179,9 @@
 }
 
 .delete-icon-btn {
-  width: 40px;
-  height: 40px;
- 
+  width: auto;
+  height: auto;
+  padding: 1.2%;
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -227,12 +227,23 @@
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(217, 83, 79, 0.13);
 }
+.primary-request-btn-sm {
+  background: #4A86E8;
+  color: white;
+  font-family: 'Noto Sans', Arial, sans-serif;
+  font-size: 14px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(217, 83, 79, 0.13);
+}
 
 .delete-request-btn:hover {
   background: #c9302c;
 }
 
-.primary-request-btn:hover {
+.primary-request-btn:hover,
+.primary-request-btn-sm:hover {
   background: #3672D9;
 }
 

@@ -8,7 +8,6 @@ interface AuthState {
   isAuth: boolean;
   loading: boolean;
 }
-localStorage.removeItem('token');
 
 const initialState: AuthState = {
   token: null,

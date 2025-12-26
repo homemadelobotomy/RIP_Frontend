@@ -1,201 +1,178 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Spinner, Form, Row, Col, Button } from "react-bootstrap";
+import { Form, Row, Col, Button } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { fetchRequestsList } from "../slices/solarpanelRequestSlice";
+import { fetchRequestsList, moderateRequest } from "../slices/solarpanelRequestSlice";
 import Layout from "../components/Layout";
-import "../styles/RequestsList.css";
 import Breadcrumbs from "../components/Breadcrumbs";
-import { resetRequestFilter, setEndDate, setStartDate, setStatus } from "../slices/requestFilter";
+import { RequestCard } from "../components/RequestCard";
+import { formatDateForAPI } from "../utils/dataUtils";
+import { resetRequestFilter, setEndDate, setStartDate, setStatus, setCreator } from "../slices/requestFilter";
+import "../styles/RequestsList.css";
+
+const POLLING_INTERVAL = 5000;
+
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 function RequestsListPage() {
-    const dispatch = useAppDispatch();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [pollingTrigger, setPollingTrigger] = useState(0);
+  const [updatingRequestId, setUpdatingRequestId] = useState<number | null>(null);
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: '', start_date: '', end_date: '', creator: ''
+  });
 
-    const { requestsList } = useAppSelector((state) => state.solarpanelRequest);
-    const { isModerator, isAuth, login} = useAppSelector((state) => state.auth);
-    const { status, start_date, end_date } = useAppSelector((state) => state.requestFilter);
+  const { requestsList } = useAppSelector((state) => state.solarpanelRequest);
+  const { isModerator, isAuth } = useAppSelector((state) => state.auth);
+  const { status, start_date, end_date, creator } = useAppSelector((state) => state.requestFilter);
 
+  const loadRequests = useCallback((filters: { status: string; start_date: string; end_date: string }) => {
+    const apiFilters: { start_date?: string; end_date?: string; status?: string } = {};
+    if (filters.status) apiFilters.status = filters.status;
+    if (filters.start_date) apiFilters.start_date = formatDateForAPI(filters.start_date + " 00:00:00");
+    if (filters.end_date) apiFilters.end_date = formatDateForAPI(filters.end_date + " 23:59:59");
+    return dispatch(fetchRequestsList(apiFilters));
+  }, [dispatch]);
 
-    const formatDateForAPI = (dateString: string): string => {
-        if (!dateString) return "";
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, "0");
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-            const seconds = String(date.getSeconds()).padStart(2, "0");
-            return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-        };
-
-    const loadRequests = () => {
-        setLoading(true)
-        const filters: { start_date?: string; end_date?: string; status?: string } = {};
-
-        if (status) filters.status = status;
-        if (start_date) filters.start_date = formatDateForAPI(start_date + " 00:00:00");
-        if (end_date) filters.end_date = formatDateForAPI(end_date + " 23:59:59");
-
-        dispatch(fetchRequestsList(filters)).finally(() => setLoading(false));
-  };
-    useEffect(() => {
+  
+   useEffect(() => {
     if (!isAuth) {
-        navigate("/")
+      navigate("/");
+      return;
     }
-   loadRequests();
-
-    }, [dispatch]);
-
-    const getStatusBadge = (status?: string) => {
-    let className = "status-badge ";
-    let text = status || "Неизвестно";
-
-    if (status === "черновик") {
-    className += "status-draft";
-    text = "Черновик";
-    } else if (status === "сформирован") {
-    className += "status-formed";
-    text = "Сформирован";
-    } else if (status === "завершен") {
-    className += "status-completed";
-    text = "Завершен";
-    } else if (status === "отклонен") {
-    className += "status-rejected";
-    text = "Отклонен";
+    
+    const today = getTodayDate();
+    
+    if (!start_date) {
+      dispatch(setStartDate(today));
     }
-
-    return <span className={className}>{text}</span>;
+    if (!end_date) {
+      dispatch(setEndDate(today));
+    }
+    
+    const initialFilters = {
+      status: status || '',
+      start_date: start_date || today,
+      end_date: end_date || today,
+      creator: creator || ''
     };
-    const handleResetFilter = () => {
-        dispatch(resetRequestFilter());
-        dispatch(fetchRequestsList())
-    };
+    
+    setAppliedFilters(initialFilters);
+    setLoading(true);
+    loadRequests(initialFilters).finally(() => setLoading(false));
+  }, [isAuth, navigate]); 
 
-     const handleApplyFilter = () => {
-        loadRequests();
-    };
+  useEffect(() => {
+    if (!isAuth || !isModerator) return;
+    const timeoutId = setTimeout(() => {
+      loadRequests(appliedFilters).finally(() => setPollingTrigger(prev => prev + 1));
+    }, POLLING_INTERVAL);
+    return () => clearTimeout(timeoutId);
+  }, [isAuth, appliedFilters, pollingTrigger]);
 
-    const filteredRequests = isModerator
-    ? requestsList.filter((req) => req.status === "сформирован" || req.creator == login)
-    : requestsList;
+    function handleResetFilter () {
+    dispatch(resetRequestFilter());
+    setAppliedFilters({ status: '', start_date: '', end_date: '', creator: '' });
+    setLoading(true);
+    loadRequests({ status: '', start_date: '', end_date: '' }).finally(() => setLoading(false));
+  }
 
-    if (loading) {
-    return (
+    function handleApplyFilter (){
+    const newFilters = { status, start_date, end_date, creator };
+    setAppliedFilters(newFilters);
+    setLoading(true);
+    loadRequests(newFilters).finally(() => setLoading(false));
+  }
+
+  const handleStatusChange = async (requestId: number, action: string) => {
+    setUpdatingRequestId(requestId);
+    const result = await dispatch(moderateRequest({ requestId, action }));
+    if (moderateRequest.fulfilled.match(result)) {
+      await loadRequests(appliedFilters);
+    }
+    setUpdatingRequestId(null);
+  };
+
+  const filteredRequests = requestsList.filter((req) => {
+    if (!appliedFilters.creator) return true;
+    return req.creator?.toLowerCase().includes(appliedFilters.creator.toLowerCase());
+  });
+
+  const uniqueCreators = Array.from(new Set(requestsList.map(req => req.creator).filter(Boolean)));
+
+  return (
     <Layout>
-        <div className="text-center mt-5">
-        <Spinner animation="border" />
-        </div>
-    </Layout>
-    );
-    }
-
-    return (
-    <Layout>
-        <Breadcrumbs
-            items={[
-                { label: "Главная", path: "/" },
-                { label: "Все расчеты", path: "/solarpanel-requests" }
-            ]}
-        />
-
-    <div className="requests-page">
+      <Breadcrumbs items={[{ label: "Главная", path: "/" }, { label: "Все расчеты", path: "/solarpanel-requests" }]} />
+      <div className="requests-page">
         <h2>{isModerator ? "Расчеты на модерацию" : "Мои расчеты"}</h2>
-
-        <div className="requests-filter" style={{ marginBottom: '2rem' }}>
+        <div className="requests-filter">
           <Form>
             <Row className="g-3">
-              <Col md={3}>
+              <Col md={isModerator ? 2 : 3}>
                 <Form.Label>Статус</Form.Label>
-                <Form.Select
-                  value={status}
-                  onChange={(e) => dispatch(setStatus(e.target.value))}
-                >
+                <Form.Select value={status} onChange={(e) => dispatch(setStatus(e.target.value))}>
                   <option value="">Все</option>
                   <option value="сформирован">Сформирован</option>
                   <option value="завершен">Завершен</option>
                   <option value="отклонен">Отклонен</option>
                 </Form.Select>
               </Col>
-              <Col md={3}>
-                <Form.Label>Дата формирования от</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={start_date}
-                  onChange={(e) => dispatch(setStartDate(e.target.value))}
-                />
+              {isModerator && (
+                <Col md={2}>
+                  <Form.Label>Создатель</Form.Label>
+                  <Form.Control type="text" placeholder="Логин" value={creator} onChange={(e) => dispatch(setCreator(e.target.value))} list="creators-list" />
+                  <datalist id="creators-list">
+                    {uniqueCreators.map(c => <option key={c} value={c} />)}
+                  </datalist>
+                </Col>
+              )}
+              <Col md={isModerator ? 2 : 3}>
+                <Form.Label>Дата от</Form.Label>
+                <Form.Control type="date" value={start_date} onChange={(e) => dispatch(setStartDate(e.target.value))} />
               </Col>
-              <Col md={3}>
-                <Form.Label>Дата формирования до</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={end_date}
-                  onChange={(e) => dispatch(setEndDate(e.target.value))}
-                />
+              <Col md={isModerator ? 2 : 3}>
+                <Form.Label>Дата до</Form.Label>
+                <Form.Control type="date" value={end_date} onChange={(e) => dispatch(setEndDate(e.target.value))} />
               </Col>
               <Col md={2}>
                 <Form.Label>&nbsp;</Form.Label>
-                <Button
-                  variant="primary"
-                  onClick={handleApplyFilter}
-                  className="w-100"
-                >
-                  Применить
-                </Button>
+                <Button variant="primary" onClick={handleApplyFilter} className="w-100">Применить</Button>
               </Col>
-              <Col md={1}>
+              <Col md={isModerator ? 2 : 1}>
                 <Form.Label>&nbsp;</Form.Label>
-                <Button
-                  variant="secondary"
-                  onClick={handleResetFilter}
-                  className="w-100"
-                >
-                  Сброс
-                </Button>
+                <Button variant="secondary" onClick={handleResetFilter} className="w-100">Сброс</Button>
               </Col>
             </Row>
           </Form>
         </div>
 
         {filteredRequests.length === 0 ? (
-        <div className="no-requests">
-            <p>Нет расчетов</p>
-        </div>
+          <div className="no-requests"><p>Нет расчетов</p></div>
         ) : (
-        <div className="requests-table-container">
-            <table className="requests-table">
-            <thead>
-                <tr>
-                <th>ID</th>
-                {isModerator && <th>Пользователь</th>}
-                <th>Статус</th>
-                <th>Дата создания</th>
-                <th>Дата формирования</th>
-                <th>Дата завершения</th>
-                </tr>
-            </thead>
-            <tbody>
-                {filteredRequests.map((req) => (
-                <tr
-                    key={req.id}
-                    onClick={() => navigate(`/requests/${req.id}`)}
-                >
-                    <td>{req.id}</td>
-                    {isModerator && <td>{req.creator || "—"}</td>}
-                    <td>{getStatusBadge(req.status)}</td>
-                    <td>{req.created_at || "—"}</td>
-                    <td>{req.formated_at || "—"}</td>
-                    <td>{req.moderated_at || "—"}</td>
-                </tr>
-                ))}
-            </tbody>
-            </table>
-        </div>
+          <div className="requests-cards">
+            {filteredRequests.map((req) => (
+              <RequestCard 
+                key={req.id} 
+                req={req} 
+                isModerator={isModerator} 
+                updatingRequestId={updatingRequestId} 
+                onStatusChange={handleStatusChange} 
+                onClick={() => navigate(`/solarpanel-requests/${req.id}`)} 
+              />
+            ))}
+          </div>
         )}
-    </div>
+      </div>
     </Layout>
-    );
+  );
 }
 
 export default RequestsListPage;

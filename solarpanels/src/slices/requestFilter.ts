@@ -5,12 +5,14 @@ interface RequestFilterState {
   status: string;
   start_date: string;
   end_date: string;
+  creator:string;
 }
 
 const initialState: RequestFilterState = {
   status: "",
   start_date: "",
   end_date: "",
+  creator: "",
 };
 export const fetchRequestsList = createAsyncThunk(
   'request/fetchList',
@@ -32,13 +34,17 @@ const requestFilterSlice = createSlice({
     setEndDate(state, action: PayloadAction<string>) {
       state.end_date = action.payload;
     },
+     setCreator: (state, action: PayloadAction<string>) => {
+      state.creator = action.payload;
+    },
     resetRequestFilter(state) {
       state.status = "";
       state.start_date = "";
       state.end_date = "";
+      state.creator = '';
     }
   }
 });
 
-export const { setStatus, setStartDate, setEndDate, resetRequestFilter } = requestFilterSlice.actions;
+export const { setStatus, setStartDate, setEndDate, setCreator, resetRequestFilter } = requestFilterSlice.actions;
 export default requestFilterSlice.reducer;

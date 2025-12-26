@@ -17,6 +17,8 @@ import Layout from "../components/Layout";
 import defaultImg from "../resources/default.png";
 import "../styles/RequestDetailPage.css";
 import Breadcrumbs from "../components/Breadcrumbs";
+import cross from "../../public/cross.png"
+
 
 function RequestDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,28 +62,35 @@ function RequestDetailPage() {
     }
   }, [error, dispatch]);
 
-  const handleSaveChanges = async () => {
-    if (!id) return;
-    const insolationResult = await dispatch(updateInsolation({ requestId: Number(id), insolation }));
-    
-    if (updateInsolation.rejected.match(insolationResult)) {
-      return;
-    }
+  const handleSaveAreaChanges = async (panelId: number) => {
+      if (!id) return;
+      
+      const area = panelAreas[panelId];
+      
+      if (area === undefined || area < 0) {
+        return;
+      }
 
-    // Сохраняем площади
-    for (const [panelId, area] of Object.entries(panelAreas)) {
       const areaResult = await dispatch(updatePanelArea({ 
         requestId: Number(id), 
-        panelId: Number(panelId), 
+        panelId, 
         area 
       }));
       
       if (updatePanelArea.rejected.match(areaResult)) {
         return;
       }
-    }
+  
 
+    dispatch(fetchCurrentRequest(Number(id)));
+  };
+  const handleSaveInsolationChanges = async () => {
+    if (!id) return;
+    const insolationResult = await dispatch(updateInsolation({ requestId: Number(id), insolation }));
     
+    if (updateInsolation.rejected.match(insolationResult)) {
+      return;
+    }
     dispatch(fetchCurrentRequest(Number(id)));
     
   };
@@ -89,10 +98,8 @@ function RequestDetailPage() {
   const handleRemovePanel = async (panelId: number) => {
     if (id) {
       await dispatch(removePanelFromRequest({ requestId: Number(id), panelId }));
-        await dispatch(fetchCurrentRequest(Number(id)));
-      await dispatch(fetchRequestInfo());
+      await dispatch(fetchCurrentRequest(Number(id)));
       console.log(currentRequest)
-      
     }
   };
 
@@ -217,7 +224,7 @@ if (isDraft && !currentRequest.solarpanels?.length) {
         {isDraft && (
           <button 
             className="primary-request-btn"
-            onClick={handleSaveChanges}
+            onClick={handleSaveInsolationChanges}
             style={{ height: '42px', padding: '0 24px' }}
           >
             Сохранить
@@ -263,7 +270,13 @@ if (isDraft && !currentRequest.solarpanels?.length) {
           placeholder="м²"
           disabled={!isDraft}
           min="0"
-        />
+        />{isDraft && (
+          <button className="primary-request-btn-sm"
+            onClick={() => handleSaveAreaChanges(panel.id!)}
+            style={{ height: '30px', padding: '0 20px' }}>
+              Сохранить
+          </button>)}
+        
       </div>
       
       {isDraft && (
@@ -275,7 +288,7 @@ if (isDraft && !currentRequest.solarpanels?.length) {
           }}
           title="Удалить панель"
         >
-          🗑️
+          <img src={cross} style={{ width: 10, height: 10 }}></img>
         </button>
       )}
     </div>
@@ -284,14 +297,14 @@ if (isDraft && !currentRequest.solarpanels?.length) {
         {isDraft &&  currentRequest.solarpanels?.length &&(
           <div className="delete-request-form">
             <button className="primary-request-btn" onClick={handleFormateRequest}>
-              Сформировать заявку
+              Сформировать расчет
             </button>
             <button
               className="delete-request-btn"
               style={{ marginLeft: "1rem" }}
               onClick={handleDeleteRequest}
             >
-              Удалить заявку
+              Удалить расчет
             </button>
           </div>
         )}
@@ -303,14 +316,14 @@ if (isDraft && !currentRequest.solarpanels?.length) {
               style={{ background: "#4A86E8" }}
               onClick={() => handleModerate("завершен")}
             >
-              Завершить заявку
+              Расчитать
             </button>
             <button
               className="delete-request-btn"
               style={{ marginLeft: "1rem" }}
               onClick={() => handleModerate("отклонен")}
             >
-              Отклонить заявку
+              Отклонить расчет
             </button>
           </div>
         )}

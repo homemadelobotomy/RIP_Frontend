@@ -393,9 +393,9 @@ export class Api<
     panelsList: (
       query?: {
         /** Минимальная мощность для фильтрации */
-        start_value?: number;
+        start_value?: number|null;
         /** Максимальная мощность для фильтрации */
-        end_value?: number;
+        end_value?: number|null;
       },
       params: RequestParams = {},
     ) =>

@@ -34,7 +34,7 @@ function App() {
         <Route path="/panels/:id" element={<PanelDetails />} />
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/register" element={<RegisterPage/>} />
-        <Route path="/requests/:id" element={<RequestDetailPage/>}/>
+        <Route path="/solarpanel-requests/:id" element={<RequestDetailPage/>}/>
         <Route path="/solarpanel-requests" element={<RequestsListPage/>}/>
         <Route path="/profile" element = {<ProfilePage/>}/>
         

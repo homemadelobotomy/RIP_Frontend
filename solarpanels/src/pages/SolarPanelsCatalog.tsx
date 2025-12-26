@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Form, Button, InputGroup, Alert, Modal } from "react-bootstrap";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { setSolarPanels, setSolarPanelsInRequest } from "../slices/dataSlice";
-import { getSolarPanels, getSolarPanelsRequestInfo } from "../getData";
+import { fetchSolarPanels } from "../slices/dataSlice";
+import { fetchRequestInfo } from "../slices/solarpanelRequestSlice";
 import Layout from "../components/Layout";
 import Breadcrumbs from "../components/Breadcrumbs";
 import SolarPanelCard from "../components/SolarPanelCard";
@@ -12,34 +12,26 @@ import { setEndValue, setStartValue } from "../slices/filterSlice";
 import CartButton from "../components/CartButton";
 
 function PanelsCatalog() {
-  const dispatch = useAppDispatch();
-  const panels = useAppSelector((state) => state.ourSolarPanels?.SolarPanels ?? []);
-  const start_value = useAppSelector((state) => state.filter.start_value);
-  const end_value = useAppSelector((state) => state.filter.end_value);
+    const dispatch = useAppDispatch();
+  
+  const { solarPanels: panels } = useAppSelector((state) => state.ourSolarPanels);
+  const { start_value, end_value } = useAppSelector((state) => state.filter);
+  const { isAuth } = useAppSelector((state) => state.auth);
 
   const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
-    getSolarPanels(start_value,end_value)
-      .then((data) => {
-        dispatch(setSolarPanels(data));
-      })
-      .catch(() => {
-        dispatch(setSolarPanels([]));
-      });
-    getSolarPanelsRequestInfo().then((info) => dispatch(setSolarPanelsInRequest(info.panels_in_request)));
-  }, []);
-
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const data = await getSolarPanels(start_value || null, end_value || null);
-      dispatch(setSolarPanels(data));
-      setShowFilter(false); 
-    } catch (error) {
-      console.error("Ошибка поиска:", error);
-      dispatch(setSolarPanels([]));
+    dispatch(fetchSolarPanels({ start_value, end_value }));
+    
+    if (isAuth) {
+      dispatch(fetchRequestInfo());
     }
+  }, [dispatch, isAuth]);
+
+    const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await dispatch(fetchSolarPanels({ start_value, end_value }));
+    setShowFilter(false);
   };
 
 
@@ -63,16 +55,16 @@ function PanelsCatalog() {
             <Form.Control
               type="number"
               placeholder="От"
-              value={start_value}
-              onChange={(e) => dispatch(setStartValue(e.target.value))}
+              value={start_value ?? ""}
+              onChange={(e) => dispatch(setStartValue(e.target.value ? Number(e.target.value) : null))}
               min={0}
             />
             <InputGroup.Text>-</InputGroup.Text>
             <Form.Control
               type="number"
               placeholder="До"
-              value={end_value}
-              onChange={(e) => dispatch(setEndValue(e.target.value))}
+              value={end_value ?? ""}
+              onChange={(e) => dispatch(setEndValue(e.target.value ? Number(e.target.value) : null))}
               min={0}
             />
           </InputGroup>
@@ -95,16 +87,17 @@ function PanelsCatalog() {
             <Form.Control
               type="number"
               placeholder="От"
-              value={start_value}
-              onChange={(e) => dispatch(setStartValue(e.target.value))}
+              value={start_value ?? ""}
+              onChange={(e) => dispatch(setStartValue(e.target.value ? Number(e.target.value) : null))}
               min={0}
             />
             <InputGroup.Text>-</InputGroup.Text>
             <Form.Control
               type="number"
               placeholder="До"
-              value={end_value}
-              onChange={(e) => dispatch(setEndValue(e.target.value))}
+              value={end_value ?? ""}
+              onChange={(e) => dispatch(setEndValue(e.target.value ? Number(e.target.value) : null))}
+
               min={0}
             />
           </InputGroup>

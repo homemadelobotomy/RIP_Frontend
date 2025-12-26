@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api } from '../api';
+import { logoutUser } from './authSlice'
 import type { 
   LabInternalAppDTOOneSolarPanelRequestResponse,
   LabInternalAppDTOSolarPanelsRequestsResponse 
@@ -69,7 +70,7 @@ export const updatePanelArea = createAsyncThunk(
       return response.data;
     } catch (error: any) {
         
-        const message = error?.response?.status == 400 ? "Заполните все поля площади корректно" : "Ошибка сохранения :(";
+        const message = error?.response?.status == 400 ? "Заполните поле площади корректно" : "Ошибка сохранения :(";
         return rejectWithValue(message);
     }
   }
@@ -168,7 +169,15 @@ const requestSlice = createSlice({
       })
       .addCase(moderateRequest.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.currentRequest = null;
+        state.requestsList = [];
+        state.requestInfo = {}; 
+        state.isDraft = false;
+        state.error = null;
       });
+      
   },
 });
 

@@ -22,7 +22,7 @@ function CartButton() {
 
   const handleClick = () => {
     if (requestId) {
-      navigate(`/requests/${requestId}`);
+      navigate(`/solarpanel-requests/${requestId}`);
     }
   };
 
@@ -33,7 +33,7 @@ function CartButton() {
       onClick={handleClick}
     >
       <img src={cartIcon} alt="Корзина" style={{ width: 20, height: 20 }} />
-      {panelsInRequest > 0 && (
+      {panelsInRequest > 0 && isAuth &&(
         <span className="cart-badge">{panelsInRequest}</span>
       )}
     </button>
