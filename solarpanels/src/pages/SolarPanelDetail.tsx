@@ -13,7 +13,6 @@ function PanelDetails() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  // Селекторы из Redux
   const { currentPanel: panel, loading, error } = useAppSelector((state) => state.ourSolarPanels);
 
   useEffect(() => {
@@ -21,13 +20,11 @@ function PanelDetails() {
       dispatch(fetchPanelById(Number(id)));
     }
 
-    // Очистка при размонтировании
     return () => {
       dispatch(clearCurrentPanel());
     };
   }, [dispatch, id]);
 
-  // Показываем загрузку
   if (loading) {
     return (
       <Layout>
@@ -45,7 +42,6 @@ function PanelDetails() {
     );
   }
 
-  // Показываем ошибку
   if (error || !panel) {
     return (
       <Layout>
@@ -66,7 +62,6 @@ function PanelDetails() {
     );
   }
 
-  // Показываем детали панели
   return (
     <Layout>
       <Breadcrumbs
