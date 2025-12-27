@@ -1,180 +1,321 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+
+interface SolarPanelFilterState {
+  start_value: number | null;
+  end_value: number | null;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
+const initialState: SolarPanelFilterState = {
+  start_value: null,
+  end_value: null,
+};
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-
-
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import HomePage from "./pages/MainPage";
-import PanelsCatalog from "./pages/SolarPanelsCatalog";
-import PanelDetails from "./pages/SolarPanelDetail";
-import { useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import {  dest_root } from "./target_config";
-
-function App() {
-  useEffect(()=>{
-    invoke('tauri', {cmd:'create'})
-      .then(() =>{console.log("Tauri launched")})
-      .catch(() =>{console.log("Tauri not launched")})
-    return () =>{
-      invoke('tauri', {cmd:'close'})
-        .then(() =>{console.log("Tauri launched")})
-        .catch(() =>{console.log("Tauri not launched")})
+const solarPanelFilterSlice = createSlice({
+  name: "solarPanelFilter",
+  initialState,
+  reducers: {
+    setSolarPanelStartValue(state, action: PayloadAction<number | null>) {
+      state.start_value = action.payload;
+    },
+    setSolarPanelEndValue(state, action: PayloadAction<number | null>) {
+      state.end_value = action.payload;
+    },
+    resetSolarPanelFilter(state) {
+      state.start_value = null;
+      state.end_value = null;
     }
-  }, [])
+  }
+});
+
+export const { setSolarPanelStartValue, setSolarPanelEndValue, 
+  resetSolarPanelFilter } = solarPanelFilterSlice.actions;
+export default solarPanelFilterSlice.reducer;
+
+
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { api } from '../api';
+
+
+export const MOCK_PANELS: SolarPanel[] = [
+  {
+    ID: 1,
+    Title: "Монокристаллическая панель",
+    Type: "Монокристаллическая",
+    Description: "Высокоэффективная панель из монокристаллов.",
+    Power: 300,
+    Height: 1640,
+    Width: 992,
+    Depth: 35,
+    Efficiency: "20-22",
+    Image: "default.png",
+    IsDelete: false,
+  },
+  {
+    ID: 2,
+    Title: "Поликристаллическая панель",
+    Type: "Поликристаллическая",
+    Description: "Надежная панель с хорошим соотношением цена/качество.",
+    Power: 280,
+    Height: 1650,
+    Width: 998,
+    Depth: 35,
+    Efficiency: "18-20",
+    Image: "default.png",
+    IsDelete: false,
+  },
+  {
+    ID: 3,
+    Title: "Тонкопленочная панель",
+    Type: "Тонкопленочная",
+    Description: "Гибкая и легкая панель для сложных поверхностей.",
+    Power: 150,
+    Height: 1200,
+    Width: 600,
+    Depth: 10,
+    Efficiency: "15-17",
+    Image: "default.png",
+    IsDelete: false,
+  },
+];
+
+export interface SolarPanel {
+  ID: number;
+  Title: string;
+  Type: string;
+  Description: string;
+  Power: number;
+  Height: number;
+  Width: number;
+  Depth: number;
+  Efficiency: string;
+  Image: string;
+  IsDelete: boolean;
+}
+
+interface DataState {
+  solarPanels: SolarPanel[];
+  currentPanel: SolarPanel | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: DataState = {
+  solarPanels: [],
+  currentPanel: null,
+  loading: false,
+  error: null,
+};
+
+export const fetchSolarPanels = createAsyncThunk(
+  'data/fetchPanels',
+  async (
+    filters: { start_value?: number|null; end_value?: number|null } = {}, 
+  ) => {
+    try {
+      const response = await api.panels.panelsList(filters);
+      return response.data;
+    } catch (error: any) {
+            
+      let filtered = MOCK_PANELS;
+      if (filters.start_value || filters.end_value) {
+        const min = filters.start_value ? filters.start_value : 0;
+        const max = filters.end_value ? filters.end_value : Infinity;
+        filtered = MOCK_PANELS.filter((p) => p.Power >= min && p.Power <= max);
+      }
+      
+      return filtered;
+    }
+  }
+);
+
+export const fetchPanelById = createAsyncThunk(
+  'data/fetchPanelById',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await api.panels.panelsDetail(id);
+      return response.data;
+    } catch (error: any) {
+      const panel = MOCK_PANELS.find((p) => p.ID === id);
+      if (!panel) {
+        return rejectWithValue("Панель не найдена");
+      }
+      return panel;
+    }
+  }
+);
+
+
+const dataSlice = createSlice({
+  name: 'data',
+  initialState,
+  reducers: {
+    clearCurrentPanel: (state) => {
+      state.currentPanel = null;
+      state.error = null;
+    },
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchSolarPanels.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSolarPanels.fulfilled, (state, action) => {
+        state.solarPanels = action.payload as SolarPanel[];
+        state.loading = false;
+      })
+      .addCase(fetchSolarPanels.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      
+      .addCase(fetchPanelById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPanelById.fulfilled, (state, action) => {
+        state.currentPanel = action.payload as SolarPanel;
+        state.loading = false;
+      })
+      .addCase(fetchPanelById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+  },
+});
+
+export const { clearCurrentPanel, clearError } = dataSlice.actions;
+export default dataSlice.reducer;
+
+
+import { useEffect, useState } from "react";
+import { Form, Button, InputGroup, Alert, Modal } from "react-bootstrap";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { fetchSolarPanels } from "../slices/dataSlice";
+import { fetchSolarPanelRequestInfo } from "../slices/solarpanelRequestSlice";
+import Layout from "../components/Layout";
+import Breadcrumbs from "../components/Breadcrumbs";
+import SolarPanelCard from "../components/SolarPanelCard";
+import "../styles/catalog.css";
+import filterIcon from "../../public/Filter.png"
+import { setSolarPanelEndValue, setSolarPanelStartValue } from "../slices/filterSlice";
+import CartButton from "../components/CartButton";
+
+function PanelsCatalog() {
+    const dispatch = useAppDispatch();
+  
+  const { solarPanels: panels } = useAppSelector((state) => state.ourSolarPanels);
+  const { start_value, end_value } = useAppSelector((state) => state.filter);
+  const { isAuth } = useAppSelector((state) => state.auth);
+
+  const [showFilter, setShowFilter] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchSolarPanels({ start_value, end_value }));
+    
+    if (isAuth) {
+      dispatch(fetchSolarPanelRequestInfo());
+    }
+  }, [dispatch, isAuth]);
+
+    const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await dispatch(fetchSolarPanels({ start_value, end_value }));
+    setShowFilter(false);
+  };
+
+
   return (
-    <Router basename = {dest_root} 
-    //"RIP_Frontend/"
-    >
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/panels" element={<PanelsCatalog />} />
-        <Route path="/panels/:id" element={<PanelDetails />} />
-        
-      </Routes>
-    </Router>
-  );
+  <Layout>
+    <Breadcrumbs />
+
+    <div className="filter-section">
+      <Button 
+        variant="outline-primary" 
+        onClick={() => setShowFilter(true)} 
+        className="filter-toggle-btn"
+      >
+        <img src={filterIcon} style={{width:30 ,height:30 }}></img>
+      </Button>
+
+      
+      <div className="filter-desktop">
+        <Form onSubmit={handleSearch} className="filter-form">
+          <InputGroup>
+            <Form.Control
+              type="number"
+              placeholder="От"
+              value={start_value ?? ""}
+              onChange={(e) => dispatch(setSolarPanelStartValue(e.target.value ? Number(e.target.value) : null))}
+              min={0}
+            />
+            <InputGroup.Text>-</InputGroup.Text>
+            <Form.Control
+              type="number"
+              placeholder="До"
+              value={end_value ?? ""}
+              onChange={(e) => dispatch(setSolarPanelEndValue(e.target.value ? Number(e.target.value) : null))}
+              min={0}
+            />
+          </InputGroup>
+          <Button type="submit" variant="primary">Найти</Button>
+        </Form>
+      </div>
+
+
+      <CartButton/>
+    </div>
+
+
+    <Modal show={showFilter} onHide={() => setShowFilter(false)} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Фильтр по мощности</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSearch}>
+          <InputGroup className="mb-3">
+            <Form.Control
+              type="number"
+              placeholder="От"
+              value={start_value ?? ""}
+              onChange={(e) => dispatch(setSolarPanelStartValue(e.target.value ? Number(e.target.value) : null))}
+              min={0}
+            />
+            <InputGroup.Text>-</InputGroup.Text>
+            <Form.Control
+              type="number"
+              placeholder="До"
+              value={end_value ?? ""}
+              onChange={(e) => dispatch(setSolarPanelEndValue(e.target.value ? Number(e.target.value) : null))}
+
+              min={0}
+            />
+          </InputGroup>
+          <Button type="submit" variant="primary" className="w-100">Найти</Button>
+        </Form>
+      </Modal.Body>
+    </Modal>
+
+    {panels.length === 0 && <Alert variant="warning" className="mt-4">Нет панелей</Alert>}
+
+    <div className="catalog-grid">
+      {panels.map((panel) => (
+        <SolarPanelCard key={panel.ID} panel={panel} />
+      ))}
+    </div>
+  </Layout>
+);
+
 }
 
-export default App;
-
-
-.layout-wrapper {
-  min-height: 100vh;
-  width: 100vw;
-  position: relative;
-  overflow: hidden;
-}
-
-.background-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  z-index: 0;
-}
-
-.content-overlay {
-  position: relative;
-  z-index: 2; 
-  min-height: 100vh;
-  width: 100vw;
-
-}
-
-.layout-content {
-  flex: 1;
-  padding-top: 1rem;
-  padding-bottom: 2rem;
-}
-
-
-
-.layout-wrapper {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.layout-content {
-  flex: 1;
-  padding-top: 1rem;
-  padding-bottom: 2rem;
-}
-
-
-.header-navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  background-color: #EFEFEF !important;
-  border-bottom: 1px solid #E0E0E0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-height: 70px;
-  z-index: 1000; 
-}
-
-.header-brand {
-  color: #666 !important;
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
-  font-family: 'Noto Sans', Arial, sans-serif;
-  font-weight: 600 !important;
-  margin: 0 auto;
-}
-
-.header-brand:hover {
-  color: #333 !important;
-}
-
-
-
-import { Navbar, Container } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import "../styles/Header.css";
-
-function Header() {
-  return (
-    <Navbar className="header-navbar">
-      <Container fluid>
-        <Navbar.Brand as={Link} to="/panels" className="header-brand">
-          СОЛНЕЧНЫЕ ПАНЕЛИ
-        </Navbar.Brand>
-      </Container>
-    </Navbar>
-  );
-}
-
-export default Header;
-
+export default PanelsCatalog;
 
 
 import type { ReactNode } from "react";
-import Navbar from "./Navbar";
+import Header from "./Header";
 import { Container } from "react-bootstrap";
 import "../styles/Layout.css";
 
@@ -185,8 +326,8 @@ interface LayoutProps {
 function Layout({ children }: LayoutProps) {
   return (
     <div className="layout-wrapper">
-      <Navbar />
-      <Container className="layout-content">
+      <Header />
+      <Container  className="layout-content">
         {children}
       </Container>
     </div>
@@ -196,39 +337,122 @@ function Layout({ children }: LayoutProps) {
 export default Layout;
 
 
-import Navbar from "./Navbar";
-import "../styles/VideoLayout.css";
-import type { ReactNode } from "react";
-import video from "../resources/mixkit-view-of-a-solar-panel-farm-generating-sustainable-energy-47097-hd-ready.mp4"
+import { useState } from "react";
+import { Form, Button, Row, Col, InputGroup } from "react-bootstrap";
 
-interface LayoutProps {
-  children: ReactNode;
+interface FilterProps {
+  initialBegin?: string;
+  initialEnd?: string;
+  onSearch: (begin: string, end: string) => void;
 }
 
-function Layout({ children }: LayoutProps) {
-  return (
-    <div className="layout-wrapper">
+function Filter({ initialBegin = "", initialEnd = "", onSearch }: FilterProps) {
+  const [start_value, setBegin] = useState<string>(initialBegin);
+  const [end_value, setEnd] = useState<string>(initialEnd);
 
-      <video
-        className="background-video"
-        autoPlay
-        loop
-        muted
-        playsInline
-        poster=""
-      >
-        <source src={video} type="video/mp4" />
-        Ваш браузер не поддерживает видео.
-      </video>
-      <div className="content-overlay">
-        <Navbar />
-        <div className="layout-content">
-          {children}
-        </div>
-      </div>
-    </div>
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSearch(start_value.trim(), end_value.trim());
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Row className="align-items-end g-2">
+        <Col xs={12} md={8}>
+        
+          <InputGroup>
+            <Form.Control
+              type="number"
+              placeholder="От"
+              value={start_value}
+              onChange={(e) => setBegin(e.target.value)}
+              min={0}
+            />
+            <InputGroup.Text>-</InputGroup.Text>
+            <Form.Control
+              type="number"
+              placeholder="До"
+              value={end_value}
+              onChange={(e) => setEnd(e.target.value)}
+              min={0}
+            />
+          </InputGroup>
+        </Col>
+        <Col xs={12} md={4}>
+          <Button type="submit" variant="primary" className="w-100">
+            Найти
+          </Button>
+        </Col>
+      </Row>
+    </Form>
   );
 }
 
-export default Layout;
+export default Filter;
+
+
+import { Card, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { addSolarPanelToRequest, fetchSolarPanelRequestInfo } from "../slices/solarpanelRequestSlice";
+import type { SolarPanel } from "../slices/dataSlice";
+import defaultImg from "../resources/default.png";
+
+interface SolarPanelCardProps {
+  panel: SolarPanel;
+}
+
+const DEFAULT_IMAGE = defaultImg;
+
+function SolarPanelCard({ panel }: SolarPanelCardProps) {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { isAuth } = useAppSelector((state) => state.auth);
+  const imageUrl = panel.Image || DEFAULT_IMAGE;
+
+  const handleAdd = async () => {
+    if (panel.ID) {
+      await dispatch(addSolarPanelToRequest(panel.ID));
+      await dispatch(fetchSolarPanelRequestInfo());
+    }
+  };
+
+  return (
+    <Card className="product-card h-100">
+      <div className="card-image-container">
+        <Card.Img
+          variant="top"
+          src={imageUrl}
+          alt={panel.Type}
+          className="card-image"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+          }}
+        />
+      </div>
+      <Card.Body className="d-flex flex-column">
+        <Card.Title className="card-title">{panel.Type}</Card.Title>
+        <Card.Text className="card-power">Мощность: {panel.Power} Вт</Card.Text>
+        <Button
+          variant="outline-primary"
+          className="mt-auto card-button"
+          onClick={() => navigate(`/panels/${panel.ID}`)}
+        >
+          Подробнее
+        </Button>
+        {isAuth && (
+          <Button
+            variant="primary"
+            className="mt-2 card-button"
+            onClick={handleAdd}
+          >
+            Добавить
+          </Button>
+        )}
+      </Card.Body>
+    </Card>
+  );
+}
+
+export default SolarPanelCard;
 

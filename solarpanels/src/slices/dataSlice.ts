@@ -56,6 +56,7 @@ export interface SolarPanel {
   Efficiency: string;
   Image: string;
   IsDelete: boolean;
+  embedding?: number[];
 }
 
 interface DataState {
