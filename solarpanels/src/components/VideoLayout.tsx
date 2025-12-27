@@ -17,7 +17,7 @@ function VideoLayout({ children }: LayoutProps) {
         playsInline
         poster=""
       >
-        <source src="/video.mp4" type="video/mp4" />
+        <source src={`${import.meta.env.BASE_URL}video.mp4`} type="video/mp4" />
         Ваш браузер не поддерживает видео.
       </video>
       <div className="content-overlay">

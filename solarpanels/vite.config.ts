@@ -30,7 +30,7 @@ export default defineConfig({
       manifest:{
         "name": "SolarPanels",
         "short_name": "SolarPanels",
-        "start_url": "/RIP_Frontend/",
+        "start_url": "/Solar_Farm_Calculation_Frontend/",
         "display": "standalone",
         "background_color": "#fdfdfd",
         "theme_color": "#fdfdfd",
@@ -47,5 +47,5 @@ export default defineConfig({
     mkcert()
   ],
   //  base: "/" 
-  base: "/RIP_Frontend/"
+  base: "/Solar_Farm_Calculation_Frontend/"
 })

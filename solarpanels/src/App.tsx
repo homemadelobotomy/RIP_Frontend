@@ -21,7 +21,6 @@ function App() {
   }, [])
   return (
     <Router basename = {dest_root} 
-    //"RIP_Frontend/"
     >
       <Routes>
         <Route path="/" element={<HomePage />} />
